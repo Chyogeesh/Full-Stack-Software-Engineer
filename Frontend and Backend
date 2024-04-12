@@ -1,0 +1,103 @@
+//Front-end (React with Tailwind CSS)
+// App.js
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import LandingPage from './components/LandingPage';
+import AuthModal from './components/AuthModal';
+import PaymentSection from './components/PaymentSection';
+import { signUp, signIn } from './api/auth';
+
+function App() {
+  const [user, setUser] = useState(null);
+
+  const handleSignUp = async (email, password) => {
+    try {
+      await signUp(email, password);
+      // You may want to handle user state or redirect after sign-up
+    } catch (error) {
+      console.error('Error signing up:', error);
+    }
+  };
+
+  const handleSignIn = async (email, password) => {
+    try {
+      await signIn(email, password);
+      // You may want to handle user state or redirect after sign-in
+    } catch (error) {
+      console.error('Error signing in:', error);
+    }
+  };
+
+  return (
+    <div className="App">
+      <Router>
+        <Switch>
+          <Route path="/" exact>
+            <LandingPage user={user} />
+          </Route>
+          <Route path="/login">
+            <AuthModal action="login" onAuth={handleSignIn} />
+          </Route>
+          <Route path="/signup">
+            <AuthModal action="signup" onAuth={handleSignUp} />
+          </Route>
+          <Route path="/payment">
+            <PaymentSection user={user} />
+          </Route>
+        </Switch>
+      </Router>
+    </div>
+  );
+}
+
+export default App;
+//Back-end (Firebase)
+
+//javascript
+// firebase.js
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
+
+const firebaseConfig = {
+  // Your Firebase config here
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const firestore = firebase.firestore();
+
+export { auth, firestore };
+
+// auth.js
+import { auth } from './firebase';
+
+const signUp = (email, password) => {
+  return auth.createUserWithEmailAndPassword(email, password);
+};
+
+const signIn = (email, password) => {
+  return auth.signInWithEmailAndPassword(email, password);
+};
+
+export { signUp, signIn };
+
+// payment.js
+import axios from 'axios';
+
+const processPayment = async (userId) => {
+  try {
+    // Dummy payment process, replace with actual API call
+    const response = await axios.post('your_payment_api_url', {
+      userId: userId,
+      amount: 100, // $1 payment
+      // other payment details
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export { processPayment };
